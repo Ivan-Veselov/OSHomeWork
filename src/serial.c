@@ -7,7 +7,7 @@ void init_serial() {
    * Set speed division factor
    */
   
-  // Make +0 and +1 ports to receive factor
+  // Make +0 and +1 ports receive factor
   out8(SERIAL_FST_PORT + 3, bit(7));
   
   uint16_t factor = 1;
