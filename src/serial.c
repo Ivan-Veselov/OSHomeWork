@@ -32,6 +32,8 @@ void init_serial() {
    
   // 7th bit in +3 port must be unset
   out8(SERIAL_FST_PORT + 1, 0);
+  
+  write_string_to_stdout("Serial Interface is initialized\n");
 }
 
 void write_byte_to_stdout(uint8_t byte) {

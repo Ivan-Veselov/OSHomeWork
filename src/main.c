@@ -13,7 +13,6 @@ void main(void) {
 	qemu_gdb_hang();
 
   init_serial();
-  write_string_to_stdout("Serial Interface is initialized\n");
 
 	struct desc_table_ptr ptr = {0, 0};
 	write_idtr(&ptr);
