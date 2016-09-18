@@ -8,11 +8,13 @@ static void qemu_gdb_hang(void) {
 
 #include <desc.h>
 #include <serial.h>
+#include <idt.h>
 
 void main(void) {
 	qemu_gdb_hang();
 
   init_serial();
+  init_idt();
 
 	struct desc_table_ptr ptr = {0, 0};
 	write_idtr(&ptr);

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <serial.h>
 #include <ioport.h>
 #include <utils.h>
 
