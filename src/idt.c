@@ -52,7 +52,7 @@ void init_idt() {
    */
   
   /*
-   * Write descriptors in IDT
+   * Write descriptors to IDT
    */
 
   // ...
