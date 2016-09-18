@@ -16,8 +16,8 @@ void main(void) {
   init_serial();
   init_idt();
 
-	struct desc_table_ptr ptr = {0, 0};
-	write_idtr(&ptr);
+  __asm__("int $0");
 
+  write_string_to_stdout("End of main\n");
 	while (1);
 }
