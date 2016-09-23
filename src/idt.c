@@ -3,18 +3,22 @@
 #include <serial.h>
 #include <stdint.h>
 #include <utils.h>
+#include <memory.h>
 
-#define DESCRIPTORS_NUM 1
+#define TYPE_INTERRUPT_GATE 14
+#define TYPE_TRAP_GATE 15 
+
+#define DESCRIPTORS_NUM 32
 
 extern uint64_t interruption_handlers_tbl[];
 
 struct idt_descriptor {
-  uint32_t padding;
-  uint32_t offset_high;
-  uint16_t offset_mid;
-  uint16_t flags;
-  uint16_t seg_selector;
   uint16_t offset_low;
+  uint16_t seg_selector;
+  uint16_t flags;
+  uint16_t offset_mid;
+  uint32_t offset_high;
+  uint32_t padding;
 } __attribute__((packed));
 
 struct idt_descriptor idt[DESCRIPTORS_NUM];
@@ -50,7 +54,13 @@ void init_idt() {
    * Write descriptors to IDT
    */
 
-  write_descriptor(0, interruption_handlers_tbl[0], 0, 3, 14);
+  for (int i = 0; i < DESCRIPTORS_NUM; ++i) {
+    write_descriptor(i,
+                     interruption_handlers_tbl[i],
+                     KERNEL_CS,
+                     0,
+                     TYPE_INTERRUPT_GATE);
+  }
   
   /*
    * Write IDT size (in bytes) and adress to idt register
@@ -59,6 +69,14 @@ void init_idt() {
   struct desc_table_ptr ptr = {sizeof(idt) - 1, (uint64_t)idt};
   write_idtr(&ptr);
   
-  // write_string_to_stdout("...\n");
+  write_string_to_stdout("IDT is initialized\n");
+}
+
+void interruption_handler(uint64_t interruption_id) {
+  if (interruption_id == 0) {
+    write_string_to_stdout("Interruption 0\n");
+  } else {
+    write_string_to_stdout("...\n");
+  }
 }
 
