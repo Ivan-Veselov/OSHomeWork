@@ -46,6 +46,22 @@ MakeHandler(28)
 MakeHandler(29)
 MakeHandler(30)
 MakeHandler(31)
+MakeHandler(32)
+MakeHandler(33)
+MakeHandler(34)
+MakeHandler(35)
+MakeHandler(36)
+MakeHandler(37)
+MakeHandler(38)
+MakeHandler(39)
+MakeHandler(40)
+MakeHandler(41)
+MakeHandler(42)
+MakeHandler(43)
+MakeHandler(44)
+MakeHandler(45)
+MakeHandler(46)
+MakeHandler(47)
 
 call_c_func:
   pushq %rdi
@@ -111,3 +127,19 @@ interruption_handlers_tbl:
   .quad handler29
   .quad handler30
   .quad handler31
+  .quad handler32
+  .quad handler33
+  .quad handler34
+  .quad handler35
+  .quad handler36
+  .quad handler37
+  .quad handler38
+  .quad handler39
+  .quad handler40
+  .quad handler41
+  .quad handler42
+  .quad handler43
+  .quad handler44
+  .quad handler45
+  .quad handler46
+  .quad handler47

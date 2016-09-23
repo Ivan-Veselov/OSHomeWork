@@ -9,12 +9,14 @@ static void qemu_gdb_hang(void) {
 #include <desc.h>
 #include <serial.h>
 #include <idt.h>
+#include <int_controller.h>
 
 void main(void) {
 	qemu_gdb_hang();
 
   init_serial();
   init_idt();
+  init_int_controller();
 
   __asm__("int $0");
   

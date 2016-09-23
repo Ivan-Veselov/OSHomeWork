@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define SERIAL_FST_PORT 0x3f8
-
 static inline void out8(unsigned short port, uint8_t data)
 { __asm__ volatile("outb %0, %1" : : "a"(data), "d"(port)); }
 

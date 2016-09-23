@@ -8,7 +8,7 @@
 #define TYPE_INTERRUPT_GATE 14
 #define TYPE_TRAP_GATE 15 
 
-#define DESCRIPTORS_NUM 32
+#define DESCRIPTORS_NUM 48
 
 extern uint64_t interruption_handlers_tbl[];
 

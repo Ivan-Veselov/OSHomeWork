@@ -3,6 +3,8 @@
 #include <ioport.h>
 #include <utils.h>
 
+#define SERIAL_FST_PORT 0x3f8
+
 void init_serial() {
   /*
    * Set speed division factor
