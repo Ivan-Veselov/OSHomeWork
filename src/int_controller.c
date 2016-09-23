@@ -42,3 +42,11 @@ void init_int_controller() {
   write_string_to_stdout("Interrupt controllers are initialized\n");
 }
 
+void end_of_interrupt_master() {
+  out8(MASTER_COMMAND_PORT, bit(5));
+}
+
+void end_of_interrupt_slave() {
+  out8(SLAVE_COMMAND_PORT, bit(5));
+}
+

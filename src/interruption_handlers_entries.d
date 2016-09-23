@@ -1,0 +1,1 @@
+src/interruption_handlers_entries.o: src/interruption_handlers_entries.S

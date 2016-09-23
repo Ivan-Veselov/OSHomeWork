@@ -72,11 +72,3 @@ void init_idt() {
   write_string_to_stdout("IDT is initialized\n");
 }
 
-void interruption_handler(uint64_t interruption_id) {
-  if (interruption_id == 0) {
-    write_string_to_stdout("Interruption 0\n");
-  } else {
-    write_string_to_stdout("...\n");
-  }
-}
-

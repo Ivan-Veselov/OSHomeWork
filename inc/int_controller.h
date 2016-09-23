@@ -15,5 +15,7 @@
 #define IDT_LAST_SLAVE_DESCRIPTOR 47
 
 void init_int_controller();
+void end_of_interrupt_master();
+void end_of_interrupt_slave();
 
 #endif /*__INT_CONTROLLER_H__*/
