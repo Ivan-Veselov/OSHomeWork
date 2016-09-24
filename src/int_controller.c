@@ -36,8 +36,8 @@ void init_int_controller() {
    * Mask devices as they are not initialized
    */
   
-  out8(MASTER_DATA_PORT, 0xff ^ bit(2));
-  out8(SLAVE_DATA_PORT, 0xff);
+  mask_devices(0xffffu);
+  __asm__("sti"); // enable interruptions on CPU
   
   write_string_to_stdout("Interrupt controllers are initialized\n");
 }
@@ -48,5 +48,22 @@ void end_of_interrupt_master() {
 
 void end_of_interrupt_slave() {
   out8(SLAVE_COMMAND_PORT, bit(5));
+}
+
+uint16_t masked_devices = 0;
+void set_masking() {
+  masked_devices &= 0xffffu ^ bit(2);
+  out8(MASTER_DATA_PORT, low_byte(masked_devices));
+  out8(SLAVE_DATA_PORT, high_byte(masked_devices));
+}
+
+void mask_devices(uint16_t devices) {
+  masked_devices |= devices;
+  set_masking();
+}
+
+void unmask_devices(uint16_t devices) {
+  masked_devices &= masked_devices ^ devices;
+  set_masking();
 }
 

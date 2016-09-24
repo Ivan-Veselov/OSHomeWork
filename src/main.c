@@ -10,6 +10,7 @@ static void qemu_gdb_hang(void) {
 #include <serial.h>
 #include <idt.h>
 #include <int_controller.h>
+#include <timer.h>
 
 void main(void) {
 	qemu_gdb_hang();
@@ -18,7 +19,9 @@ void main(void) {
   init_idt();
   init_int_controller();
 
+  // test
   __asm__("int $0");
+  init_timer(TIMER_MODE_RATE_GENERATOR, 0xffffu);
   
 	while (1);
 }

@@ -1,6 +1,8 @@
 #ifndef __INT_CONTROLLER_H__
 #define __INT_CONTROLLER_H__
 
+#include <stdint.h>
+
 #define MASTER_COMMAND_PORT 0x20
 #define MASTER_DATA_PORT 0x21
 
@@ -17,5 +19,8 @@
 void init_int_controller();
 void end_of_interrupt_master();
 void end_of_interrupt_slave();
+
+void mask_devices(uint16_t devices);
+void unmask_devices(uint16_t devices);
 
 #endif /*__INT_CONTROLLER_H__*/
