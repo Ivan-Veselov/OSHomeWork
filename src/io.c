@@ -184,9 +184,6 @@ uint64_t dest_str_capacity;
 static char *dest_str_ptr;
 
 void write_byte_to_str(uint8_t byte) {
-  write_byte_to_stdout(byte);
-  write_byte_to_stdout('\n');
-  
   if (dest_str_capacity) {
     --dest_str_capacity;
     *(dest_str_ptr++) = byte;
