@@ -32,10 +32,6 @@ static char str[MAX_BITS_NUMBER + 1];
 }
 
 int64_t write_signed(int64_t number) {
-  if (number == INT64_MIN) {
-    return write_string("-9223372036854775808");
-  }
-  
   int64_t signum_char = 0;
   if (number < 0) {
     write_byte('-');
@@ -101,7 +97,7 @@ int64_t print(const char *format, va_list arg) {
     }
     
     while (format[i] == modifier_letter && *ptr < 2) {
-      ++ptr;
+      ++(*ptr);
       NEXT_CHAR(format, i);
     }
     
