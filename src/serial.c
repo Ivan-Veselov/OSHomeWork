@@ -46,9 +46,13 @@ void write_byte_to_stdout(uint8_t byte) {
   out8(SERIAL_FST_PORT + 0, byte);
 }
 
-void write_string_to_stdout(const char *str) {
+int64_t write_string_to_stdout(const char *str) {
+  int64_t chars_printed = 0;
   for (int i = 0; str[i]; ++i) {
     write_byte_to_stdout(str[i]);
+    ++chars_printed;
   }
+  
+  return chars_printed;
 }
 

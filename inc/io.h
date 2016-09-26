@@ -4,10 +4,12 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-uint64_t printf(const char *format, ...);
-uint64_t vprintf(const char *format, va_list arg);
+#define IO_ERR_INVALID_FORMAT -1
 
-uint64_t snprintf(char *s, uint64_t n, const char *format, ...);
-uint64_t vsnprintf(char *s, uint64_t n, const char *format, va_list arg);
+int64_t printf(const char *format, ...);
+int64_t vprintf(const char *format, va_list arg);
+
+int64_t snprintf(char *s, uint64_t n, const char *format, ...);
+int64_t vsnprintf(char *s, uint64_t n, const char *format, va_list arg);
 
 #endif /*__IO_H__*/

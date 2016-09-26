@@ -5,6 +5,6 @@
 
 void init_serial();
 void write_byte_to_stdout(uint8_t);
-void write_string_to_stdout(const char*);
+int64_t write_string_to_stdout(const char*);
 
 #endif /*__SERIAL_H__*/
