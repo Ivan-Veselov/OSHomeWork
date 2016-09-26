@@ -10,9 +10,9 @@ static byte_writer write_byte;
 static string_writer write_string;
 
 int64_t write_unsigned(uint64_t number, int base) {
-static char str[MAX_BITS_NUMBER + 1];
-  
+  static char str[MAX_BITS_NUMBER + 1];
   int ptr = MAX_BITS_NUMBER - 1;
+  
   if (number == 0) {
     str[ptr--] = '0';
   } else {

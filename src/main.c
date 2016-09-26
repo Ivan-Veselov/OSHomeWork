@@ -25,7 +25,7 @@ void main(void) {
   
   printf("%lld\n", INT64_MIN);
   
-  /*char buffer[5];
+  char buffer[5];
   
   if (printf("0x%x\n", 255) == 5) {
     if (printf("%d\n", -300) == 5) {
@@ -35,9 +35,9 @@ void main(void) {
         }
       }
     }
-  }*/
+  }
   
-  // init_timer(TIMER_MODE_RATE_GENERATOR, 0xffffu);
+  init_timer(TIMER_MODE_RATE_GENERATOR, 0xffffu);
   
 	while (1);
 }
