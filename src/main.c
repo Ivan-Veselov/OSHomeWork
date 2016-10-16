@@ -20,24 +20,5 @@ void main(void) {
   init_idt();
   init_int_controller();
 
-  // test
-  __asm__("int $0");
-  
-  printf("%lld\n", INT64_MIN);
-  
-  char buffer[5];
-  
-  if (printf("0x%x\n", 255) == 5) {
-    if (printf("%d\n", -300) == 5) {
-      if (printf("%d\n", 0) == 2) {
-        if (snprintf(buffer, 5, "%d+%d", 250, 250) == 7) {
-          printf("%s\n", buffer);
-        }
-      }
-    }
-  }
-  
-  init_timer(TIMER_MODE_RATE_GENERATOR, 0xffffu);
-  
 	while (1);
 }
