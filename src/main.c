@@ -23,6 +23,7 @@ void main(void) {
   init_idt();
   init_int_controller();
   init_memory_map(boot_info);
+  print_memory_map();
 
 	while (1);
 }
