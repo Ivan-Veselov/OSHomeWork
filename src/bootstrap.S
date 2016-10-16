@@ -53,7 +53,12 @@ idt_ptr:
 	.space 0x100
 stack_top:
 
+.global boot_info
+boot_info:
+  .long 0x0
+
 1:
+  movl %ebx, boot_info
 	movl $stack_top, %esp
 	pushl %eax
 	call videomem_clrscr
@@ -65,6 +70,7 @@ stack_top:
 	jmp fail
 
 1:
+  movl %ebx, boot_info
 	call check_long_mode
 	call setup_mapping
 
@@ -231,7 +237,6 @@ start64:
 1:
 	hlt
 	jmp 1b
-
 
 	.bss
 	.align PAGE_SIZE

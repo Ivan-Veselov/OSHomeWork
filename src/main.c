@@ -12,6 +12,9 @@ static void qemu_gdb_hang(void) {
 #include <int_controller.h>
 #include <timer.h>
 #include <io.h>
+#include <memory_map.h>
+
+extern uint32_t boot_info;
 
 void main(void) {
 	qemu_gdb_hang();
@@ -19,6 +22,7 @@ void main(void) {
   init_serial();
   init_idt();
   init_int_controller();
+  init_memory_map(boot_info);
 
 	while (1);
 }
