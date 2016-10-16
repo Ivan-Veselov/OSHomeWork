@@ -78,6 +78,7 @@ call_c_func:
   pushq %r10
   pushq %r11
   
+  cld
   call interruption_handler
   
   popq %r11
