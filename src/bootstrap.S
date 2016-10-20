@@ -53,12 +53,7 @@ idt_ptr:
 	.space 0x100
 stack_top:
 
-.global boot_info
-boot_info:
-  .long 0x0
-
 1:
-  movl %ebx, boot_info
 	movl $stack_top, %esp
 	pushl %eax
 	call videomem_clrscr
@@ -70,7 +65,6 @@ boot_info:
 	jmp fail
 
 1:
-  movl %ebx, boot_info
 	call check_long_mode
 	call setup_mapping
 
@@ -141,6 +135,7 @@ setup_mapping:
 	movl $(bootstrap_pml4 - VIRTUAL_BASE), %edi
 	movl $(bootstrap_pml3 - VIRTUAL_BASE + PTE_PRESENT + PTE_WRITE), %eax
 	movl %eax, (%edi)
+	movl %eax, 2048(%edi)
 	movl %eax, 4088(%edi)
 
 	movl %cr4, %eax
@@ -237,6 +232,7 @@ start64:
 1:
 	hlt
 	jmp 1b
+
 
 	.bss
 	.align PAGE_SIZE
