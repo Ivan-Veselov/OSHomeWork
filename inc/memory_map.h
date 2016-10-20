@@ -9,10 +9,13 @@ struct memory_block {
   uint32_t type;
 };
 
+#define RESERVED_BLOCK 2
+
 extern struct memory_block memory_map[];
 extern uint64_t memory_map_size;
 
 void init_memory_map(uint64_t boot_info_ptr);
+void print_memory_block(struct memory_block *block);
 void print_memory_map();
 
 #endif /*__MEMORY_MAP_H__*/

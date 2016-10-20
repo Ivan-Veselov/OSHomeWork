@@ -30,7 +30,7 @@ void init_memory_map(uint64_t boot_info_ptr) {
   struct memory_block *kernel_block = memory_map + (memory_map_size++);
   kernel_block->base_addr = (uint64_t)text_phys_begin;
   kernel_block->length = (uint64_t)bss_phys_end - (uint64_t)text_phys_begin;
-  kernel_block->type = 2;
+  kernel_block->type = RESERVED_BLOCK;
   
   uint64_t kernel_left_border = kernel_block->base_addr;
   uint64_t kernel_right_border = kernel_block->base_addr + kernel_block->length - 1;
@@ -72,16 +72,21 @@ void init_memory_map(uint64_t boot_info_ptr) {
   printf("Memory map is initialized\n");
 }
 
+void print_memory_block(struct memory_block *block) {
+  printf("memory block: 0x%llx-0x%llx (%d bytes), type %d\n",
+           block->base_addr,
+           block->base_addr + block->length - 1,
+           block->length,
+           block->type);
+}
+
 void print_memory_map() {
   printf("Memory map:\n");
+  printf("----------------\n");
   for (uint64_t i = 0; i < memory_map_size; ++i) {
-    printf("memory block: 0x%llx-0x%llx (%d bytes), type %d\n",
-           memory_map[i].base_addr,
-           memory_map[i].base_addr + memory_map[i].length - 1,
-           memory_map[i].length,
-           memory_map[i].type);
+    print_memory_block(memory_map + i);
   }
   
-  printf("\n");
+  printf("----------------\n");
 }
 

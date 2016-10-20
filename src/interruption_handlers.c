@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <serial.h>
 #include <int_controller.h>
+#include <io.h>
 
 void timer_handler() {
   write_string_to_stdout("TICK\n"); 
@@ -40,10 +41,6 @@ void interruption_handler(uint64_t interruption_id) {
     return;
   }
   
-  if (interruption_id == 0) {
-    write_string_to_stdout("Interruption 0\n");
-  } else {
-    write_string_to_stdout("...\n");
-  }
+  printf("Interruption %d\n", interruption_id);
 }
 

@@ -13,6 +13,7 @@ static void qemu_gdb_hang(void) {
 #include <timer.h>
 #include <io.h>
 #include <memory_map.h>
+#include <buddy_alloc.h>
 
 extern uint32_t boot_info;
 
@@ -24,6 +25,7 @@ void main(void) {
   init_int_controller();
   init_memory_map(boot_info);
   print_memory_map();
-
+  init_buddy_allocator();
+  
 	while (1);
 }
