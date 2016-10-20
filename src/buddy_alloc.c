@@ -2,8 +2,8 @@
 #include <io.h>
 
 #define FIRST_LOGICAL_ADDR 0xffff800000000000ll
-#define LOGICAL_ADDR(phys_addr) ((phys_addr) + VIRTUAL_BASE)
-#define PHYSICAL_ADDR(log_addr) ((log_addr) - VIRTUAL_BASE)
+#define LOGICAL_ADDR(phys_addr) ((phys_addr) + FIRST_LOGICAL_ADDR)
+#define PHYSICAL_ADDR(log_addr) ((log_addr) - FIRST_LOGICAL_ADDR)
 
 struct page_descriptor {
   uint8_t allocated;
