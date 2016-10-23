@@ -13,4 +13,12 @@
 #define low_dword(n) ((n) & 0xffffffffull)
 #define high_dword(n) (((n) >> 32) & 0xffffffffull)
 
+static uint64_t u64min(uint64_t a, uint64_t b) {
+  if (a < b) {
+    return a;
+  } else {
+    return b;
+  }
+}
+
 #endif /*__UTILS_H__*/

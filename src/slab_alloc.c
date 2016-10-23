@@ -1,5 +1,6 @@
 #include <slab_alloc.h>
 #include <io.h>
+#include <utils.h>
 
 uint64_t next_or_this_power_of_2(uint64_t number) {
   uint64_t res = 1;
@@ -11,7 +12,7 @@ uint64_t next_or_this_power_of_2(uint64_t number) {
 }
 
 slab_t init_slab(uint64_t unit_size, uint64_t units_number) {
-  unit_size += sizeof(void*);
+  unit_size = u64min(sizeof(void*), unit_size);
   
   uint64_t bytes_needed = unit_size * units_number + sizeof(void*);
   uint64_t pages = (bytes_needed + PAGE_SIZE - 1) / PAGE_SIZE;
