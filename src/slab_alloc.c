@@ -11,47 +11,51 @@ uint64_t next_or_this_power_of_2(uint64_t number) {
   return res;
 }
 
-slab_t init_slab(uint64_t unit_size, uint64_t units_number) {
-  unit_size = u64min(sizeof(void*), unit_size);
+slab_allocator_t* init_slab(uint64_t unit_size, uint64_t units_number) {
+  if (units_number == 0) {
+    return NULL;
+  }
   
-  uint64_t bytes_needed = unit_size * units_number + sizeof(void*);
+  unit_size = u64min(sizeof(slab_unit_t), unit_size);
+  
+  uint64_t bytes_needed = unit_size * units_number + sizeof(slab_allocator_t);
   uint64_t pages = (bytes_needed + PAGE_SIZE - 1) / PAGE_SIZE;
   
-  slab_t memory = (slab_t)buddy_alloc(next_or_this_power_of_2(pages));
+  void* memory = buddy_alloc(next_or_this_power_of_2(pages));
   if (memory == NULL) {
     return NULL;
   }
   
-  uintptr_t *ptr = memory;
-  *ptr = (uintptr_t)ptr + sizeof(void*);
-  ptr = (uintptr_t*)(*ptr);
+  slab_allocator_t *allocator = (slab_allocator_t*)memory;
+  slab_unit_t *unit = allocator->head = (slab_unit_t*)((uintptr_t)memory + sizeof(slab_allocator_t));
   
-  for (uint64_t i = 0; i < units_number; ++i, ptr = (uintptr_t*)(*ptr)) {
-    *ptr = (uintptr_t)ptr + unit_size;
+  for (uint64_t i = 0; i < units_number; ++i, unit = unit->next) {
+    unit->next = (slab_unit_t*)((uintptr_t)unit + unit_size);
   }
   
-  *ptr = 0;
+  unit->next = NULL;
   
-  return memory;
+  return allocator;
 }
 
-void destroy_slab(slab_t slab) {
-  buddy_free(slab);
+void destroy_slab(slab_allocator_t *allocator) {
+  buddy_free(allocator);
 }
 
-void* slab_alloc(slab_t slab) {
-  if (*slab == 0) {
+void* slab_alloc(slab_allocator_t *allocator) {
+  if (allocator->head == NULL) {
     return NULL;
   }
   
-  uintptr_t *ptr = (uintptr_t*)(*slab);
-  *slab = *((uintptr_t*)(*slab));
+  slab_unit_t *unit = allocator->head;
+  allocator->head = unit->next;
   
-  return ptr;
+  return unit;
 }
 
-void slab_free(slab_t slab, void* addr) {
-  *((uintptr_t*)addr) = *slab;
-  *slab = (uintptr_t)addr;
+void slab_free(slab_allocator_t *allocator, void *addr) {
+  slab_unit_t *unit = (slab_unit_t*)addr;
+  unit->next = allocator->head;
+  allocator->head = unit;
 }
 
