@@ -19,3 +19,5 @@
 2. Buddy allocator: inc/buddy_alloc.h; src/buddy_alloc.c
 
 3. Slab allocator: src/slab_alloc.c; inc/slab_alloc.h
+
+4. Malloc: src/malloc.c; inc/malloc.h
