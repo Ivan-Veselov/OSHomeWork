@@ -80,6 +80,8 @@ struct page_descriptor* demote(struct page_descriptor *page) {
     return NULL;
   }
   
+  erase(page);
+  
   page->order--;
   insert(page);
   insert(BUDDY(page));
