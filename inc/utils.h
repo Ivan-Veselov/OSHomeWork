@@ -43,4 +43,15 @@ static inline uint64_t next_or_this_power_of_2(uint64_t number) {
   return res;
 }
 
+static inline uint8_t next_or_this_power_of_2_exp(uint64_t number) {
+  uint8_t res = 0;
+  uint64_t power = 1;
+  while (power < number) {
+    power <<= 1;
+    ++res;
+  }
+  
+  return res;
+}
+
 #endif /*__UTILS_H__*/

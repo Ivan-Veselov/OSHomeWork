@@ -11,6 +11,7 @@ struct memory_block {
 
 typedef struct memory_block memory_block_t;
 
+#define MAX_BLOCKS_IN_MEMMAP 32
 #define RESERVED_BLOCK 2
 
 extern struct memory_block memory_map[];

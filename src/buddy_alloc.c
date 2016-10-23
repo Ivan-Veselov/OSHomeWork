@@ -2,33 +2,78 @@
 #include <io.h>
 #include <utils.h>
 
-#define FIRST_LOGICAL_ADDR 0xffff800000000000ll
+#define FIRST_LOGICAL_ADDR 0xffff800000000000ull
 #define LOGICAL_ADDR(phys_addr) ((phys_addr) + FIRST_LOGICAL_ADDR)
 #define PHYSICAL_ADDR(log_addr) ((log_addr) - FIRST_LOGICAL_ADDR)
+
+struct page_descriptor;
+
+typedef struct page_descriptor page_descriptor_t;
+
+struct pages_region {
+  uint64_t size;
+  page_descriptor_t *descriptors;
+  
+  uint64_t first_page_logical_addr;
+};
+
+typedef struct pages_region pages_region_t;
 
 struct page_descriptor {
   uint8_t allocated;
   uint8_t order;
+
+  pages_region_t *region;
   
   struct page_descriptor *prev;
   struct page_descriptor *next;
 };
 
-uint64_t first_page_addr;
+uint64_t get_id(page_descriptor_t *desc) {
+  return desc - desc->region->descriptors;
+}
+
+page_descriptor_t* get_buddy(page_descriptor_t *desc) {
+  uint64_t this_id = get_id(desc);
+  uint64_t buddy_id = this_id ^ (1ll << desc->order);
+  
+  if (buddy_id >= desc->region->size) {
+    return NULL;
+  }
+  
+  page_descriptor_t *buddy_desc = desc->region->descriptors + buddy_id;
+  if (buddy_desc->allocated || buddy_desc->order != desc->order) {
+    return NULL;
+  }
+  
+  return buddy_desc;
+}
+
+void* get_page_logical_addr(page_descriptor_t *desc) {
+  return (void*)(desc->region->first_page_logical_addr + PAGE_SIZE * get_id(desc));
+}
+
+pages_region_t* memory_block_region[MAX_BLOCKS_IN_MEMMAP];
+
+page_descriptor_t* get_page_descriptor_by_addr(void *addr) {
+  uint64_t int_addr = PHYSICAL_ADDR((uint64_t)addr);
+  for (uint64_t i = 0; i < memory_map_size; ++i) {
+    memory_block_t *block = memory_map + i;
+    if (!(block->base_addr <= int_addr && int_addr < block->base_addr + block->length)) {
+      continue;
+    }
+    
+    pages_region_t *region = memory_block_region[i];
+    return region->descriptors + (int_addr - PHYSICAL_ADDR(region->first_page_logical_addr)) / PAGE_SIZE;
+  }
+  
+  return NULL;
+}
 
 #define MAX_ORDER_NUM 64
-struct page_descriptor* desc_list_head[MAX_ORDER_NUM];
-uint8_t order_amount;
+page_descriptor_t* desc_list_head[MAX_ORDER_NUM];
 
-uint64_t page_amount;
-struct page_descriptor* desc_array;
-
-#define PAGE_ID(addr) ((addr) - desc_array)
-#define BUDDY(page) (desc_array + (PAGE_ID(page) ^ (1ll << (page)->order)))
-#define PAGE_BEGIN(page) LOGICAL_ADDR(first_page_addr + PAGE_SIZE * PAGE_ID(page))
-#define PAGE_FROM_BEGINNING(addr) (desc_array + ((PHYSICAL_ADDR(addr) - first_page_addr) / PAGE_SIZE))
-
-void erase(struct page_descriptor *desc) {
+void erase(page_descriptor_t *desc) {
   if (desc->prev) {
     desc->prev->next = desc->next;
   }
@@ -45,7 +90,7 @@ void erase(struct page_descriptor *desc) {
   desc->next = NULL;
 }
 
-void insert(struct page_descriptor *desc) {
+void insert(page_descriptor_t *desc) {
   desc->next = desc_list_head[desc->order];
   desc_list_head[desc->order] = desc;
   if (desc->next) {
@@ -53,56 +98,56 @@ void insert(struct page_descriptor *desc) {
   }
 }
 
-struct page_descriptor* promote(struct page_descriptor *page) {
-  if (page->allocated) {
+page_descriptor_t* promote(page_descriptor_t *desc) {
+  if (desc->allocated) {
     return NULL;
   }
  
-  struct page_descriptor *buddy = BUDDY(page);
-  if ((uint64_t)PAGE_ID(buddy) >= page_amount || buddy->allocated || buddy->order != page->order) {
+  page_descriptor_t *buddy_desc = get_buddy(desc);
+  if (buddy_desc == NULL) {
     return NULL;
   }
   
-  erase(page);
-  erase(buddy);
+  erase(desc);
+  erase(buddy_desc);
 
-  if (buddy < page) {
-    page = buddy;
+  if (buddy_desc < desc) {
+    desc = buddy_desc;
   }
   
-  page->order++;
-  insert(page);
-  return page;
+  desc->order++;
+  insert(desc);
+  return desc;
 }
 
-struct page_descriptor* demote(struct page_descriptor *page) {
-  if (page->allocated || page->order == 0) {
+page_descriptor_t* demote(page_descriptor_t *desc) {
+  if (desc->allocated || desc->order == 0) {
     return NULL;
   }
   
-  erase(page);
+  erase(desc);
   
-  page->order--;
-  insert(page);
-  insert(BUDDY(page));
+  desc->order--;
+  insert(desc);
+  insert(get_buddy(desc));
   
-  return page;
+  return desc;
 }
 
 void* buddy_alloc_by_order(uint8_t order) {
-  for (uint8_t i = order; i < order_amount; ++i) {
+  for (uint8_t i = order; i < MAX_ORDER_NUM; ++i) {
     if (desc_list_head[i] == NULL) {
       continue;
     }
     
-    struct page_descriptor *page = desc_list_head[i];
-    while (page->order > order) {
-      page = demote(page);
+    page_descriptor_t *desc = desc_list_head[i];
+    while (desc->order > order) {
+      desc = demote(desc);
     }
     
-    erase(page);
-    page->allocated = 1;
-    return (void*)PAGE_BEGIN(page);
+    erase(desc);
+    desc->allocated = 1;
+    return get_page_logical_addr(desc);
   }
   
   return NULL;
@@ -110,89 +155,83 @@ void* buddy_alloc_by_order(uint8_t order) {
 
 void* buddy_alloc(uint64_t size) {
   uint64_t pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
-  return buddy_alloc_by_order(next_or_this_power_of_2(pages));
+  return buddy_alloc_by_order(next_or_this_power_of_2_exp(pages));
 }
 
 void buddy_free(void* addr) {
-  struct page_descriptor *page = PAGE_FROM_BEGINNING((uint64_t)addr);
+  page_descriptor_t *desc = get_page_descriptor_by_addr(addr);
   
-  page->allocated = 0;
-  insert(page);
-  while ((page = promote(page)));
+  desc->allocated = 0;
+  insert(desc);
+  while ((desc = promote(desc)));
 }
 
-struct memory_block* find_max_memory_block() {
-  struct memory_block *max_block = NULL;
-  uint64_t max_block_len = 0;
-  
-  for (struct memory_block *block = memory_map;
-       block != memory_map + memory_map_size; ++block) {
-    if (block->type == RESERVED_BLOCK) {
-      continue;
-    }
-    
-    if (block->length > max_block_len) {
-      max_block = block;
-      max_block_len = block->length;
-    }
-  }
-  
-  return max_block;
-}
-
-void init_buddy_allocator() {
-  struct memory_block *memory_block = find_max_memory_block();
-  if (memory_block == NULL) {
-    printf("Unable to find free memory block for buddy allocator!\n");
-    return;
-  }
-  
-  printf("Found a block for buddy allocator: ");
-  print_memory_block(memory_block);
-  
-  first_page_addr = memory_block->base_addr;
+uint64_t add_memory_block_to_buddy(memory_block_t *block, uint64_t block_id) {
+  uint64_t first_page_addr = block->base_addr;
   if (first_page_addr % PAGE_SIZE != 0) {
     first_page_addr += PAGE_SIZE - (first_page_addr % PAGE_SIZE);
   }
   
-  uint64_t block_size = memory_block->length - (first_page_addr - memory_block->base_addr);
-  page_amount = block_size / (PAGE_SIZE + sizeof(struct page_descriptor));
+  uint64_t block_size = block->length - (first_page_addr - block->base_addr);
+  uint64_t pages_amount = (block_size - sizeof(pages_region_t)) / (PAGE_SIZE + sizeof(page_descriptor_t));
   
-  if (page_amount < 1) {
-    printf("Block size is too small to create buddy allocator on it!");
-    return;
+  if (pages_amount < 1) {
+    return 0;
   }
   
-  printf("%d pages will be available\n", page_amount);
-  desc_array = (struct page_descriptor*)(LOGICAL_ADDR(first_page_addr + page_amount * PAGE_SIZE));
+  first_page_addr = LOGICAL_ADDR(first_page_addr);
+  page_descriptor_t *first_descriptor = (page_descriptor_t*)(first_page_addr + PAGE_SIZE * pages_amount);
   
-  for (uint64_t i = 0; i < page_amount; ++i) {
-    desc_array[i].allocated = 0;
-    desc_array[i].order = 0;
-    desc_array[i].prev = desc_array + (i - 1);
-    desc_array[i].next = desc_array + (i + 1);
+  pages_region_t *region = (pages_region_t*)(first_descriptor + pages_amount);
+  region->size = pages_amount;
+  region->descriptors = first_descriptor;
+  region->first_page_logical_addr = first_page_addr;
+  
+  for (uint64_t i = 0; i < region->size; ++i) {
+    region->descriptors[i].allocated = 0;
+    region->descriptors[i].order = 0;
+    region->descriptors[i].region = region;
+    
+    region->descriptors[i].next = NULL;
+    region->descriptors[i].prev = NULL;
+    
+    insert(region->descriptors + i);
   }
   
-  desc_array[0].prev = NULL;
-  desc_array[page_amount - 1].next = NULL;
-  
+  memory_block_region[block_id] = region;
+  return pages_amount;
+}
+
+void init_buddy_allocator() {
   for (uint64_t i = 0; i < MAX_ORDER_NUM; ++i) {
     desc_list_head[i] = NULL;
   }
   
-  desc_list_head[0] = desc_array;
-  
-  order_amount = 0;
-  while ((1llu << order_amount) <= page_amount) {
-    ++order_amount;
+  uint64_t pages_amount = 0;
+  for (uint64_t i = 0; i < memory_map_size; ++i) {
+    memory_block_t *block = memory_map + i;
+    if (block->type == RESERVED_BLOCK) {
+      continue;
+    }
+    
+    pages_amount += add_memory_block_to_buddy(block, i);
   }
   
-  for (uint64_t i = 0; i < (uint64_t)(order_amount - 1); ++i) {
-    struct page_descriptor *head = NULL;
+  printf("%d pages will be available for buddy allocator\n", pages_amount);
+  
+  for (uint64_t i = 0; i < (uint64_t)(MAX_ORDER_NUM - 1); ++i) {
+    page_descriptor_t *head = NULL;
     while (desc_list_head[i]) {
       if (promote(desc_list_head[i]) == NULL) {
-        head = desc_list_head[i];
-        erase(head);
+        page_descriptor_t *desc = desc_list_head[i];
+        erase(desc);
+        
+        desc->next = head;
+        if (head) {
+          head->prev = desc;
+        }
+        
+        head = desc;
       }
     }
     

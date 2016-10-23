@@ -4,8 +4,6 @@
 
 typedef uint8_t* pointer;
 
-#define MAX_BLOCKS_IN_MEMMAP 32
-
 memory_block_t memory_map[MAX_BLOCKS_IN_MEMMAP];
 uint64_t memory_map_size = 0;
 
