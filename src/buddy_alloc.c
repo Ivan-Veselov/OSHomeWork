@@ -1,5 +1,6 @@
 #include <buddy_alloc.h>
 #include <io.h>
+#include <utils.h>
 
 #define FIRST_LOGICAL_ADDR 0xffff800000000000ll
 #define LOGICAL_ADDR(phys_addr) ((phys_addr) + FIRST_LOGICAL_ADDR)
@@ -86,7 +87,7 @@ struct page_descriptor* demote(struct page_descriptor *page) {
   return page;
 }
 
-void* buddy_alloc(uint8_t order) {
+void* buddy_alloc_by_order(uint8_t order) {
   for (uint8_t i = order; i < order_amount; ++i) {
     if (desc_list_head[i] == NULL) {
       continue;
@@ -103,6 +104,11 @@ void* buddy_alloc(uint8_t order) {
   }
   
   return NULL;
+}
+
+void* buddy_alloc(uint64_t size) {
+  uint64_t pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+  return buddy_alloc_by_order(next_or_this_power_of_2(pages));
 }
 
 void buddy_free(void* addr) {

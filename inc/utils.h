@@ -34,4 +34,13 @@ static inline void swap(void *a, void *b, uint64_t size) {
   }
 }
 
+static inline uint64_t next_or_this_power_of_2(uint64_t number) {
+  uint64_t res = 1;
+  while (res < number) {
+    res <<= 1;
+  }
+  
+  return res;
+}
+
 #endif /*__UTILS_H__*/

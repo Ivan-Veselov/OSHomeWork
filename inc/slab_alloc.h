@@ -13,6 +13,8 @@ typedef struct slab_unit slab_unit_t;
 
 struct slab_allocator {
   slab_unit_t *head;
+  struct slab_allocator *next;
+  uint64_t allocated_units;
 };
 
 typedef struct slab_allocator slab_allocator_t;
