@@ -1,11 +1,12 @@
 #include <memory_map.h>
 #include <io.h>
+#include <utils.h>
 
 typedef uint8_t* pointer;
 
 #define MAX_BLOCKS_IN_MEMMAP 32
 
-struct memory_block memory_map[MAX_BLOCKS_IN_MEMMAP];
+memory_block_t memory_map[MAX_BLOCKS_IN_MEMMAP];
 uint64_t memory_map_size = 0;
 
 extern char text_phys_begin[];
@@ -19,15 +20,25 @@ struct mmap_entry {
 } __attribute__((packed));
 
 void add_memory_block(uint64_t base_addr, uint64_t length, uint32_t type) {
-  struct memory_block *memory_block = memory_map + memory_map_size++;
+  memory_block_t *memory_block = memory_map + memory_map_size++;
   
   memory_block->base_addr = base_addr;
   memory_block->length = length;
   memory_block->type = type;
 }
 
+void sort_memory_map() {
+  for (uint64_t i = 0; i < memory_map_size; ++i) {
+    for (uint64_t j = i + 1; j < memory_map_size; ++j) {
+      if (memory_map[i].base_addr > memory_map[j].base_addr) {
+        swap(memory_map + i, memory_map + j, sizeof(memory_block_t));
+      }
+    }
+  }
+}
+
 void init_memory_map(uint64_t boot_info_ptr) {
-  struct memory_block *kernel_block = memory_map + (memory_map_size++);
+  memory_block_t *kernel_block = memory_map + (memory_map_size++);
   kernel_block->base_addr = (uint64_t)text_phys_begin;
   kernel_block->length = (uint64_t)bss_phys_end - (uint64_t)text_phys_begin;
   kernel_block->type = RESERVED_BLOCK;
@@ -68,6 +79,8 @@ void init_memory_map(uint64_t boot_info_ptr) {
                        mmap_entry->type);
     }
   }
+  
+  sort_memory_map();
   
   printf("Memory map is initialized\n");
 }

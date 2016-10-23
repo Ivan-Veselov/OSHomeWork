@@ -9,6 +9,8 @@ struct memory_block {
   uint32_t type;
 };
 
+typedef struct memory_block memory_block_t;
+
 #define RESERVED_BLOCK 2
 
 extern struct memory_block memory_map[];
