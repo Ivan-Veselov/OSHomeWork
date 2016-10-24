@@ -57,6 +57,10 @@ stack_top:
 boot_info:
   .long 0x0
 
+.global pml4_i
+pml4_i:
+  .long 0x0
+
 1:
   movl %ebx, boot_info
 	movl $stack_top, %esp
@@ -72,6 +76,8 @@ boot_info:
 1:
 	call check_long_mode
 	call setup_mapping
+	movl %cr3, %ecx
+	movl %ecx, pml4_i
 
 #define EFER_MSR	0xC0000080
 #define EFER_LM		(1 << 8)

@@ -19,6 +19,7 @@ slab_allocator_t* init_slab(uint64_t unit_size, uint64_t units_number) {
   slab_allocator_t *allocator = (slab_allocator_t*)memory;
   
   allocator->next = NULL;
+  allocator->prev = NULL;
   allocator->allocated_units = 0;
   slab_unit_t *unit = allocator->head = (slab_unit_t*)((uintptr_t)memory + sizeof(slab_allocator_t));
   

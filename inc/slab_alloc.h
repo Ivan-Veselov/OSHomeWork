@@ -14,6 +14,7 @@ typedef struct slab_unit slab_unit_t;
 struct slab_allocator {
   slab_unit_t *head;
   struct slab_allocator *next;
+  struct slab_allocator *prev;
   uint64_t allocated_units;
 };
 

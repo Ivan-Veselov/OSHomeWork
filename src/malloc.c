@@ -40,8 +40,14 @@ void* allocate_with_slab(uint8_t size_type) {
   void *memory = slab_alloc(*head_allocator);
   
   if ((*head_allocator)->head == NULL) {
-    *head_allocator = (*head_allocator)->next;
-    (*head_allocator)->next = NULL;
+    slab_allocator_t *allocator = *head_allocator;
+    
+    *head_allocator = allocator->next;
+    if (*head_allocator) {
+      (*head_allocator)->prev = NULL;
+    }
+    
+    allocator->next = NULL;
   }
   
   return write_info(memory, *head_allocator, size_type);
@@ -73,6 +79,11 @@ void free_slab(memory_info_t *info, void *addr) {
   slab_allocator_t **head_allocator = slab_list_head + info->size_type;
   if (allocator->head == NULL) {
     allocator->next = *head_allocator;
+    
+    if (*head_allocator) {
+      (*head_allocator)->prev = allocator;
+    }
+    
     *head_allocator = allocator;
   }
   
@@ -80,6 +91,10 @@ void free_slab(memory_info_t *info, void *addr) {
   
   if (allocator->allocated_units == 0) {
     *head_allocator = allocator->next;
+    if (*head_allocator) {
+      (*head_allocator)->prev = NULL;
+    }
+    
     destroy_slab(allocator);
   }
 }
