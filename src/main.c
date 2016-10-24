@@ -32,7 +32,7 @@ void main(void) {
   /* Allocators testing */
 
   for (uint64_t test = 0; test < 1000; ++test) {
-    const uint64_t size = 100;
+    const uint64_t size = 1000;
     
     uint64_t **array = (uint64_t**)malloc(sizeof(uint64_t*) * size);
     
@@ -50,6 +50,8 @@ void main(void) {
     
     free(array);
   }
+
+  printf("Pages allocated: %llu\n", get_pages_allocated());
   
   /*____________________*/
   

@@ -73,6 +73,11 @@ page_descriptor_t* get_page_descriptor_by_addr(void *addr) {
 #define MAX_ORDER_NUM 64
 page_descriptor_t* desc_list_head[MAX_ORDER_NUM];
 
+uint64_t pages_allocated;
+uint64_t get_pages_allocated() {
+  return pages_allocated;
+}
+
 void erase(page_descriptor_t *desc) {
   if (desc->prev) {
     desc->prev->next = desc->next;
@@ -147,6 +152,7 @@ void* buddy_alloc_by_order(uint8_t order) {
     
     erase(desc);
     desc->allocated = 1;
+    pages_allocated += 1 << desc->order;
     return get_page_logical_addr(desc);
   }
   
@@ -161,6 +167,7 @@ void* buddy_alloc(uint64_t size) {
 void buddy_free(void* addr) {
   page_descriptor_t *desc = get_page_descriptor_by_addr(addr);
   
+  pages_allocated -= 1 << desc->order;
   desc->allocated = 0;
   insert(desc);
   while ((desc = promote(desc)));

@@ -7,7 +7,7 @@ slab_allocator_t* init_slab(uint64_t unit_size, uint64_t units_number) {
     return NULL;
   }
   
-  unit_size = u64min(sizeof(slab_unit_t), unit_size);
+  unit_size = u64max(sizeof(slab_unit_t), unit_size);
   
   uint64_t bytes_needed = unit_size * units_number + sizeof(slab_allocator_t);
 

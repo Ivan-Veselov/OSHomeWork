@@ -11,4 +11,6 @@ void* buddy_alloc_by_order(uint8_t order);
 void* buddy_alloc(uint64_t size);
 void  buddy_free(void* addr);
 
+uint64_t get_pages_allocated();
+
 #endif /*__BUDDY_ALLOC_H__*/
