@@ -3,6 +3,7 @@
 #include <buddy_alloc.h>
 #include <slab_alloc.h>
 #include <utils.h>
+#include <io.h>
 
 #define BIG_SIZE (PAGE_SIZE / 8)
 #define MIN_SIZE 16
@@ -21,16 +22,17 @@ void* write_info(void *memory, slab_allocator_t *allocator, uint8_t size_type) {
   memory_info_t *info = (memory_info_t*)memory;
   info->slab_allocator = allocator;
   info->size_type = size_type;
-  return memory;
+  
+  return (void*)((uintptr_t)memory + sizeof(memory_info_t));
 }
 
 void* allocate_with_slab(uint8_t size_type) {
   slab_allocator_t **head_allocator = slab_list_head + size_type;
   
-  if (head_allocator == NULL) {
+  if (*head_allocator == NULL) {
     uint64_t size = MIN_SIZE << size_type;
     *head_allocator = init_slab(size, (PAGE_SIZE - sizeof(slab_allocator_t)) / size);
-    if (head_allocator == NULL) {
+    if (*head_allocator == NULL) {
       return NULL;  
     }
   }
@@ -58,7 +60,7 @@ void* malloc(uint64_t size) {
   }
 
   size = next_or_this_power_of_2(size);
-  uint8_t size_type = 0;
+  uint8_t size_type = -4;
   while (size >>= 1) {
     ++size_type;
   }
@@ -83,7 +85,10 @@ void free_slab(memory_info_t *info, void *addr) {
 }
 
 void free(void *addr) {
+  addr = (void*)((uintptr_t)addr - sizeof(memory_info_t));
+  
   memory_info_t *info = (memory_info_t*)addr;
+  
   if (info->slab_allocator == NULL) {
     buddy_free(addr);
     return;

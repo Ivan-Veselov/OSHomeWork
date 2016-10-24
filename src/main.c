@@ -15,6 +15,7 @@ static void qemu_gdb_hang(void) {
 #include <memory_map.h>
 #include <buddy_alloc.h>
 #include <slab_alloc.h>
+#include <malloc.h>
 
 extern uint32_t boot_info;
 
@@ -27,6 +28,23 @@ void main(void) {
   init_memory_map(boot_info);
   print_memory_map();
   init_buddy_allocator();
+  
+  /* Allocators testing */
+
+  for (uint64_t test = 0; test < 1000; ++test) {  
+    uint64_t *array = (uint64_t*)malloc(sizeof(uint64_t) * 100);
+    for (uint64_t i = 0; i < 100; ++i) {
+      array[i] = i;
+    }
+    
+    free(array);
+    
+    uint64_t *number = malloc(sizeof(uint64_t));
+    *number = 42;
+    free(number);
+  }
+  
+  /*____________________*/
   
 	while (1);
 }
