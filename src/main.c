@@ -31,20 +31,28 @@ void main(void) {
   
   /* Allocators testing */
 
-  for (uint64_t test = 0; test < 1000; ++test) {
+  for (uint64_t test = 0; test < 10; ++test) {
     const uint64_t size = 1000;
     
-    uint64_t **array = (uint64_t**)malloc(sizeof(uint64_t*) * size);
-    
+    uint64_t ***array = (uint64_t***)malloc(sizeof(uint64_t**) * size);
     for (uint64_t i = 0; i < size; ++i) {
-      array[i] = (uint64_t*)malloc(sizeof(uint64_t));
+      array[i] = (uint64_t**)malloc(sizeof(uint64_t*) * size);
+      for (uint64_t j = 0; j < size; ++j) {
+        array[i][j] = (uint64_t*)malloc(sizeof(uint64_t));
+      }
     }
     
     for (uint64_t i = 0; i < size; ++i) {
-      *(array[i]) = i;
+      for (uint64_t j = 0; j < size; ++j) {
+        *(array[i][j]) = i * size + j;
+      }
     }
     
     for (uint64_t i = 0; i < size; ++i) {
+      for (uint64_t j = 0; j < size; ++j) {
+        free(array[i][j]);
+      }
+      
       free(array[i]);
     }
     
@@ -54,7 +62,8 @@ void main(void) {
   printf("Pages allocated: %llu\n", get_pages_allocated());
   
   /*____________________*/
-  
+
+  printf("Main hang...\n");  
 	while (1);
 }
 
