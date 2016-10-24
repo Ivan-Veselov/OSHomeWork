@@ -1,6 +1,8 @@
 #include <memory_map.h>
 #include <io.h>
 #include <utils.h>
+#include <stddef.h>
+#include <memory.h>
 
 typedef uint8_t* pointer;
 
@@ -33,6 +35,41 @@ void sort_memory_map() {
       }
     }
   }
+}
+
+extern uint32_t pml4_i;
+void init_paging() {
+  memory_block_t *block = NULL;
+  for (uint64_t i = 0; i < memory_map_size; ++i) {
+    block = memory_map + i;
+    if (block->type != RESERVED_BLOCK && block->length >= PAGE_SIZE) {
+      break;
+    }
+  }
+  
+  if (block == NULL) {
+    printf("Unable to find memory for PDPT!\n");
+    return;
+  }
+  
+  uint64_t *pdpt = (uint64_t*)block->base_addr;
+  if (block->length == PAGE_SIZE) {
+    block->type = RESERVED_BLOCK;
+  } else {
+    add_memory_block(block->base_addr, PAGE_SIZE, RESERVED_BLOCK);
+    block->base_addr += PAGE_SIZE;
+    block->length -= PAGE_SIZE;
+    sort_memory_map();
+  }
+  
+  printf("pml4: 0x%llx\n", pml4_i);
+  // ???...
+  uint64_t *pml4 = (uint64_t*)(uint64_t)pml4_i;
+  pml4 = pml4;
+  pdpt = pdpt;
+  
+  uint64_t *ptr = NULL;
+  *ptr = 5;
 }
 
 void init_memory_map(uint64_t boot_info_ptr) {
@@ -81,6 +118,8 @@ void init_memory_map(uint64_t boot_info_ptr) {
   sort_memory_map();
   
   printf("Memory map is initialized\n");
+  
+  init_paging();
 }
 
 void print_memory_block(struct memory_block *block) {

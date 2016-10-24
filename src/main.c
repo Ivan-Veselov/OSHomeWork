@@ -31,17 +31,24 @@ void main(void) {
   
   /* Allocators testing */
 
-  for (uint64_t test = 0; test < 1000; ++test) {  
-    uint64_t *array = (uint64_t*)malloc(sizeof(uint64_t) * 100);
-    for (uint64_t i = 0; i < 100; ++i) {
-      array[i] = i;
+  for (uint64_t test = 0; test < 1000; ++test) {
+    const uint64_t size = 100;
+    
+    uint64_t **array = (uint64_t**)malloc(sizeof(uint64_t*) * size);
+    
+    for (uint64_t i = 0; i < size; ++i) {
+      array[i] = (uint64_t*)malloc(sizeof(uint64_t));
+    }
+    
+    for (uint64_t i = 0; i < size; ++i) {
+      *(array[i]) = i;
+    }
+    
+    for (uint64_t i = 0; i < size; ++i) {
+      free(array[i]);
     }
     
     free(array);
-    
-    uint64_t *number = malloc(sizeof(uint64_t));
-    *number = 42;
-    free(number);
   }
   
   /*____________________*/

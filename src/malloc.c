@@ -86,7 +86,6 @@ void free_slab(memory_info_t *info, void *addr) {
 
 void free(void *addr) {
   addr = (void*)((uintptr_t)addr - sizeof(memory_info_t));
-  
   memory_info_t *info = (memory_info_t*)addr;
   
   if (info->slab_allocator == NULL) {

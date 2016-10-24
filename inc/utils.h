@@ -15,8 +15,8 @@
 #define low_dword(n) ((n) & 0xffffffffull)
 #define high_dword(n) (((n) >> 32) & 0xffffffffull)
 
-static inline uint64_t u64min(uint64_t a, uint64_t b) {
-  if (a < b) {
+static inline uint64_t u64max(uint64_t a, uint64_t b) {
+  if (a > b) {
     return a;
   } else {
     return b;
