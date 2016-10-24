@@ -33,11 +33,11 @@ void* allocate_with_slab(uint8_t size_type) {
     uint64_t size = MIN_SIZE << size_type;
     *head_allocator = init_slab(size, (PAGE_SIZE - sizeof(slab_allocator_t)) / size);
     if (*head_allocator == NULL) {
-      return NULL;  
+      return NULL;
     }
   }
   
-  void *memory = slab_alloc(*head_allocator);
+  void *memory = write_info(slab_alloc(*head_allocator), *head_allocator, size_type);
   
   if ((*head_allocator)->head == NULL) {
     slab_allocator_t *allocator = *head_allocator;
@@ -50,7 +50,7 @@ void* allocate_with_slab(uint8_t size_type) {
     allocator->next = NULL;
   }
   
-  return write_info(memory, *head_allocator, size_type);
+  return memory;
 }
 
 void* malloc(uint64_t size) {
@@ -90,9 +90,16 @@ void free_slab(memory_info_t *info, void *addr) {
   slab_free(allocator, addr);
   
   if (allocator->allocated_units == 0) {
-    *head_allocator = allocator->next;
-    if (*head_allocator) {
-      (*head_allocator)->prev = NULL;
+    if (allocator->prev == NULL) {
+      *head_allocator = allocator->next;
+      if (*head_allocator) {
+        (*head_allocator)->prev = NULL;
+      }
+    } else {
+      allocator->prev->next = allocator->next;
+      if (allocator->next) {
+        allocator->next->prev = allocator->prev;
+      }
     }
     
     destroy_slab(allocator);
