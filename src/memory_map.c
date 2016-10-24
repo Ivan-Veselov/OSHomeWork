@@ -52,7 +52,7 @@ void init_paging() {
     return;
   }
   
-  uint64_t *pdpt = (uint64_t*)block->base_addr;
+  //uint64_t *pdpt = (uint64_t*)block->base_addr;
   if (block->length == PAGE_SIZE) {
     block->type = RESERVED_BLOCK;
   } else {
@@ -62,14 +62,14 @@ void init_paging() {
     sort_memory_map();
   }
   
-  printf("pml4: 0x%llx\n", pml4_i);
+  //printf("pml4: 0x%llx\n", pml4_i);
   // ???...
-  uint64_t *pml4 = (uint64_t*)(uint64_t)pml4_i;
+  /*uint64_t *pml4 = (uint64_t*)(uint64_t)pml4_i;
   pml4 = pml4;
   pdpt = pdpt;
   
   uint64_t *ptr = NULL;
-  *ptr = 5;
+  *ptr = 5;*/
 }
 
 void init_memory_map(uint64_t boot_info_ptr) {
