@@ -3,10 +3,15 @@
 
 #define THREAD_STACK_SIZE 0x1000
 
+#define THREAD_RUNNING 0
+#define THREAD_JOINABLE 1
+
 struct thread {
   void* stack_mem_begin;
   void* stack_pointer;
   
+  int state;
+  struct thread *prev;
   struct thread *next;
 };
 
@@ -21,6 +26,7 @@ thread_t* thread_current();
 void thread_lock();
 void thread_unlock();
 thread_t* thread_create(runnable_t function, void *arg);
+void thread_join(thread_t *other);
 
 #endif /*__THREADS_H__*/
 

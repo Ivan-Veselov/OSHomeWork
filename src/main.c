@@ -20,6 +20,14 @@ static void qemu_gdb_hang(void) {
 
 extern uint32_t boot_info;
 
+void run(void *arg) {
+  for (int i = 0; i < 10000; ++i) {
+    thread_lock();
+    printf("Thread %d: %d\n", *((int*)arg), i);
+    thread_unlock();
+  }
+}
+
 void main(void) {
 	qemu_gdb_hang();
 
@@ -65,6 +73,14 @@ void main(void) {
   printf("Pages allocated: %llu\n ", get_pages_allocated());*/
   
   /*____________________*/
+
+  int n1 = 1;
+  int n2 = 2;
+  
+  thread_t *thread1 = thread_create(run, &n1);
+  thread_t *thread2 = thread_create(run, &n2);
+  thread_join(thread1);
+  thread_join(thread2);
 
   printf("Main hang...\n");  
 	while (1);
