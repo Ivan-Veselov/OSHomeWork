@@ -30,6 +30,7 @@ void main(void) {
   print_memory_map();
   init_buddy_allocator();
   init_thread_system();
+  init_timer(TIMER_MODE_RATE_GENERATOR, 0xffffu);
   
   /* Allocators testing */
 

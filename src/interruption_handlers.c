@@ -2,25 +2,20 @@
 #include <serial.h>
 #include <int_controller.h>
 #include <io.h>
-
-void timer_handler() {
-  write_string_to_stdout("TICK\n"); 
-}
+#include <threads.h>
 
 void master_interruption_handler(uint64_t interruption_id) {
   if (interruption_id == IDT_FIRST_MASTER_DESCRIPTOR) {
-    timer_handler();
+    thread_schedule();
   }
   
   end_of_interrupt_master();
 }
 
 void slave_interruption_handler(uint64_t interruption_id) {
+  (void)interruption_id;
+  
   // handling
-
-  // supress warning
-  interruption_id = interruption_id + 1;
-  // supress warning
 
   end_of_interrupt_slave();
   end_of_interrupt_master();

@@ -2,6 +2,7 @@
 
 #include <malloc.h>
 #include <buddy_alloc.h>
+#include <int_controller.h>
 
 #include <io.h>
 
@@ -29,15 +30,25 @@ void init_thread_system() {
   
   current_thread->stack_mem_begin = NULL;
   current_thread->stack_pointer = NULL;
+  current_thread->next = current_thread;
+}
+
+void thread_schedule() {
+  thread_switch(current_thread->next);
 }
 
 void thread_origin(runnable_t function, void *arg) {
+  end_of_interrupt_master(); // First call was made from interruption handler
+	__asm__("sti"); // Interruption handler switched off interruptions
+	
 	function(arg);
 	
 	while (1);
 }
 
 thread_t* thread_create(runnable_t function, void *arg) {
+  // need some lock
+  
   thread_t *new_thread = (thread_t*)malloc(sizeof(thread_t));
 
   new_thread->stack_mem_begin = malloc(THREAD_STACK_SIZE);
@@ -46,6 +57,9 @@ thread_t* thread_create(runnable_t function, void *arg) {
 
   new_thread->stack_pointer = (void*)((uint64_t)new_thread->stack_pointer
                                             - sizeof(initial_thread_frame_t));
+
+  new_thread->next = current_thread->next;
+  current_thread->next = new_thread;
 
   initial_thread_frame_t *frame = new_thread->stack_pointer;
 
