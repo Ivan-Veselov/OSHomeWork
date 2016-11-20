@@ -21,3 +21,7 @@
 3. Slab allocator: src/slab_alloc.c; inc/slab_alloc.h
 
 4. Malloc: src/malloc.c; inc/malloc.h
+
+Работа 3
+
+1-3. Threads: src/threads.c; inc/threads.h; src/threads_asm.S
