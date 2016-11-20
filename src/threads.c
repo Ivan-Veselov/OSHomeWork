@@ -37,17 +37,25 @@ void thread_schedule() {
   thread_switch(current_thread->next);
 }
 
+void thread_lock() {
+  __asm__("cli");
+}
+
+void thread_unlock() {
+  __asm__("sti");
+}
+
 void thread_origin(runnable_t function, void *arg) {
   end_of_interrupt_master(); // First call was made from interruption handler
-	__asm__("sti"); // Interruption handler switched off interruptions
-	
+  __asm__("sti"); // Interruption handler switched off interruptions
+
 	function(arg);
-	
-	while (1);
+
+  while (1);
 }
 
 thread_t* thread_create(runnable_t function, void *arg) {
-  // need some lock
+  thread_lock();
   
   thread_t *new_thread = (thread_t*)malloc(sizeof(thread_t));
 
@@ -71,7 +79,8 @@ thread_t* thread_create(runnable_t function, void *arg) {
   frame->rbp = 0;
   
   frame->return_address = (uint64_t)(&__thread_origin);
-  
+ 
+  thread_unlock(); 
   return new_thread;
 }
 

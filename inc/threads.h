@@ -18,6 +18,8 @@ void thread_schedule();
 void thread_switch(thread_t *other);
 
 thread_t* thread_current();
+void thread_lock();
+void thread_unlock();
 thread_t* thread_create(runnable_t function, void *arg);
 
 #endif /*__THREADS_H__*/
