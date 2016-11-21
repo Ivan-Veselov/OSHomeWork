@@ -39,40 +39,6 @@ void main(void) {
   init_buddy_allocator();
   init_thread_system();
   init_timer(TIMER_MODE_RATE_GENERATOR, 0xffffu);
-  
-  /* Allocators testing */
-
-  /*for (uint64_t test = 0; test < 10; ++test) {
-    const uint64_t size = 1000;
-    
-    uint64_t ***array = (uint64_t***)malloc(sizeof(uint64_t**) * size);
-    for (uint64_t i = 0; i < size; ++i) {
-      array[i] = (uint64_t**)malloc(sizeof(uint64_t*) * size);
-      for (uint64_t j = 0; j < size; ++j) {
-        array[i][j] = (uint64_t*)malloc(sizeof(uint64_t));
-      }
-    }
-    
-    for (uint64_t i = 0; i < size; ++i) {
-      for (uint64_t j = 0; j < size; ++j) {
-        *(array[i][j]) = i * size + j;
-      }
-    }
-    
-    for (uint64_t i = 0; i < size; ++i) {
-      for (uint64_t j = 0; j < size; ++j) {
-        free(array[i][j]);
-      }
-      
-      free(array[i]);
-    }
-    
-    free(array);
-  }
-
-  printf("Pages allocated: %llu\n ", get_pages_allocated());*/
-  
-  /*____________________*/
 
   int n1 = 1;
   int n2 = 2;
