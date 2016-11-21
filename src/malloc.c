@@ -4,6 +4,7 @@
 #include <slab_alloc.h>
 #include <utils.h>
 #include <io.h>
+#include <threads.h>
 
 #define BIG_SIZE (PAGE_SIZE / 8)
 #define MIN_SIZE 16
@@ -54,10 +55,14 @@ void* allocate_with_slab(uint8_t size_type) {
 }
 
 void* malloc(uint64_t size) {
+  thread_lock();
+  
   size += sizeof(memory_info_t);
   
   if (size >= BIG_SIZE) {
     void *memory = buddy_alloc(size);
+    thread_unlock();
+    
     if (memory == NULL) {
       return NULL;
     }
@@ -71,6 +76,7 @@ void* malloc(uint64_t size) {
     ++size_type;
   }
 
+  thread_unlock();
   return allocate_with_slab(size_type);
 }
 
@@ -107,14 +113,20 @@ void free_slab(memory_info_t *info, void *addr) {
 }
 
 void free(void *addr) {
+  thread_lock();
+  
   addr = (void*)((uintptr_t)addr - sizeof(memory_info_t));
   memory_info_t *info = (memory_info_t*)addr;
   
   if (info->slab_allocator == NULL) {
     buddy_free(addr);
+    
+    thread_unlock();
     return;
   }
   
   free_slab(info, addr);
+  
+  thread_unlock();
 }
 
