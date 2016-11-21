@@ -1,6 +1,8 @@
 #ifndef __THREADS_H__
 #define __THREADS_H__
 
+#include <stdint.h>
+
 #define THREAD_STACK_SIZE 0x1000
 
 #define THREAD_RUNNING 0
@@ -13,6 +15,8 @@ struct thread {
   int state;
   struct thread *prev;
   struct thread *next;
+  
+  uint32_t lock_count;
 };
 
 typedef struct thread thread_t;

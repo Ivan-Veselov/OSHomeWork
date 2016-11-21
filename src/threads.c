@@ -34,6 +34,8 @@ void init_thread_system() {
   current_thread->state = THREAD_RUNNING;
   current_thread->prev = current_thread;
   current_thread->next = current_thread;
+  
+  current_thread->lock_count = 0;
 }
 
 void thread_schedule() {
@@ -41,11 +43,19 @@ void thread_schedule() {
 }
 
 void thread_lock() {
-  __asm__("cli");
+  if (current_thread->lock_count == 0) {
+    __asm__("cli");
+  }
+  
+  current_thread->lock_count++;
 }
 
 void thread_unlock() {
-  __asm__("sti");
+  current_thread->lock_count--;
+  
+  if (current_thread->lock_count == 0) {
+    __asm__("sti");
+  }
 }
 
 void thread_origin(runnable_t function, void *arg) {
